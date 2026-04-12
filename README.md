@@ -209,32 +209,32 @@ docker-compose up -d
 | 🗑️ delete | Изтрит инструмент |
 | ✅ approve | Одобрен инструмент |
 | ❌ reject | Отказан инструмент |
-
 ## 📁 Структура на проекта
 
-
+```
 ai-tools-platform/
 ├── backend/
-│ ├── app/
-│ │ ├── Http/
-│ │ │ ├── Controllers/
-│ │ │ └── Middleware/
-│ │ ├── Models/
-│ ├── database/
-│ │ ├── migrations/
-│ │ └── seeders/
-│ └── routes/
-│ └── api.php
-│
+│   ├── app/
+│   │   ├── Http/
+│   │   │   ├── Controllers/
+│   │   │   └── Middleware/
+│   │   ├── Models/
+│   ├── database/
+│   │   ├── migrations/
+│   │   └── seeders/
+│   └── routes/
+│       └── api.php
+
 ├── frontend/
-│ ├── app/
-│ │ ├── dashboard/
-│ │ ├── tools/
-│ │ ├── tools/[id]/
-│ │ ├── add-tool/
-│ │ ├── admin/
-│ │ ├── profile/
-│ │ └── components/
-│
+│   ├── app/
+│   │   ├── dashboard/
+│   │   ├── tools/
+│   │   ├── tools/[id]/
+│   │   ├── add-tool/
+│   │   ├── admin/
+│   │   ├── profile/
+│   │   └── components/
+
 ├── README.md
 └── AGENTS.md
+```
