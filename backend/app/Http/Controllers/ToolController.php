@@ -1,5 +1,4 @@
-index()липсват два филтъра. Ето целия поправен файл:
-php<?php
+<?php
 
 namespace App\Http\Controllers;
 
