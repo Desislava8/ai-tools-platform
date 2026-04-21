@@ -1,10 +1,14 @@
-
 'use client'
-
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-export default function Navbar({ user }: { user: any }) {
+type User = {
+  name: string
+  role: 'owner' | 'backend' | 'frontend' | 'designer' | 'qa' | 'pm'
+  email: string
+}
+
+export default function Navbar({ user }: { user: User }) {
   const router = useRouter()
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -32,7 +36,6 @@ export default function Navbar({ user }: { user: any }) {
         >
           🤖 AI Tools Platform
         </h1>
-
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-4">
           {visibleLinks.map(link => (
@@ -55,7 +58,6 @@ export default function Navbar({ user }: { user: any }) {
             Изход
           </button>
         </div>
-
         {/* Mobile Menu Button */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
@@ -64,7 +66,6 @@ export default function Navbar({ user }: { user: any }) {
           {menuOpen ? '✕' : '☰'}
         </button>
       </div>
-
       {/* Mobile Menu */}
       {menuOpen && (
         <div className="md:hidden bg-white border-t border-gray-200 px-4 py-3 space-y-2">
