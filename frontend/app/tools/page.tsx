@@ -4,13 +4,54 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Navbar from '../components/Navbar'
 
+type User = {
+  name: string
+  role: 'owner' | 'backend' | 'frontend' | 'designer' | 'qa' | 'pm'
+  email: string
+}
+
+type Category = {
+  id: number
+  name: string
+}
+
+type Role = {
+  id: number
+  name: string
+}
+
+type Tag = {
+  id: number
+  name: string
+}
+
+type Tool = {
+  id: number
+  name: string
+  link?: string
+  documentation?: string
+  description?: string
+  how_to_use?: string
+  examples?: string
+  video_url?: string
+  difficulty?: 'beginner' | 'intermediate' | 'advanced'
+  screenshot?: string
+  status?: string
+  categories?: Category[]
+  roles?: Role[]
+  tags?: Tag[]
+  ratings_avg_score?: number
+  ratings_count?: number
+  comments_count?: number
+}
+
 export default function ToolsPage() {
   const router = useRouter()
-  const [tools, setTools] = useState<any[]>([])
-  const [editTool, setEditTool] = useState<any>(null)
-  const [user, setUser] = useState<any>(null)
-  const [allCategories, setAllCategories] = useState<any[]>([])
-  const [allRoles, setAllRoles] = useState<any[]>([])
+  const [tools, setTools] = useState<Tool[]>([])
+  const [editTool, setEditTool] = useState<Tool | null>(null)
+  const [user, setUser] = useState<User | null>(null)
+  const [allCategories, setAllCategories] = useState<Category[]>([])
+  const [allRoles, setAllRoles] = useState<Role[]>([])
   const [selectedCategories, setSelectedCategories] = useState<number[]>([])
   const [selectedRoles, setSelectedRoles] = useState<number[]>([])
   const [toast, setToast] = useState('')
@@ -63,10 +104,10 @@ export default function ToolsPage() {
     loadTools()
   }
 
-  function startEdit(tool: any) {
+  function startEdit(tool: Tool) {
     setEditTool({...tool})
-    setSelectedCategories(tool.categories ? tool.categories.map((c: any) => c.id) : [])
-    setSelectedRoles(tool.roles ? tool.roles.map((r: any) => r.id) : [])
+    setSelectedCategories(tool.categories ? tool.categories.map(c => c.id) : [])
+    setSelectedRoles(tool.roles ? tool.roles.map(r => r.id) : [])
   }
 
   function toggleCategory(id: number) {
@@ -82,6 +123,7 @@ export default function ToolsPage() {
   }
 
   async function saveTool() {
+    if (!editTool) return
     const token = localStorage.getItem('token')
     const res = await fetch(`http://localhost:8000/api/tools/${editTool.id}`, {
       method: 'PUT',
@@ -105,7 +147,7 @@ export default function ToolsPage() {
     loadTools()
   }
 
-  function renderStars(tool: any) {
+  function renderStars(tool: Tool) {
     const avg = tool.ratings_avg_score || 0
     const isHovered = hoveredStar?.toolId === tool.id
     const activeStars = isHovered ? hoveredStar!.star : Math.round(avg)
@@ -123,11 +165,11 @@ export default function ToolsPage() {
     ))
   }
 
-  const filteredTools = tools.filter((tool: any) => {
+  const filteredTools = tools.filter((tool: Tool) => {
     const matchName = tool.name?.toLowerCase().includes(filterName.toLowerCase())
-    const matchRole = filterRole === '' || tool.role === filterRole
-    const matchCategory = filterCategory === '' || (tool.categories && tool.categories.some((c: any) => c.name === filterCategory))
-    const matchTag = filterTag === '' || (tool.tags && tool.tags.some((t: any) => t.name.toLowerCase().includes(filterTag.toLowerCase())))
+    const matchRole = filterRole === '' || (tool.roles && tool.roles.some(r => r.name === filterRole))
+    const matchCategory = filterCategory === '' || (tool.categories && tool.categories.some(c => c.name === filterCategory))
+    const matchTag = filterTag === '' || (tool.tags && tool.tags.some(t => t.name.toLowerCase().includes(filterTag.toLowerCase())))
     return matchName && matchRole && matchCategory && matchTag
   })
 
@@ -141,10 +183,9 @@ export default function ToolsPage() {
         </div>
       )}
 
-      <Navbar user={user} />
+      <Navbar user={user!} />
 
       <div className="max-w-6xl mx-auto px-4 py-10">
-        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
           <div>
             <h2 className="text-3xl font-bold text-gray-900">🤖 AI Инструменти</h2>
@@ -160,7 +201,6 @@ export default function ToolsPage() {
           )}
         </div>
 
-        {/* Filters */}
         <div className="bg-white rounded-2xl shadow-sm border border-indigo-100 p-4 mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <input
             placeholder="🔍 Търси по име..."
@@ -174,7 +214,7 @@ export default function ToolsPage() {
             className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
           >
             <option value="">Всички роли</option>
-            {allRoles.map((r: any) => (
+            {allRoles.map(r => (
               <option key={r.id} value={r.name}>{r.name}</option>
             ))}
           </select>
@@ -184,7 +224,7 @@ export default function ToolsPage() {
             className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
           >
             <option value="">Всички категории</option>
-            {allCategories.map((c: any) => (
+            {allCategories.map(c => (
               <option key={c.id} value={c.name}>{c.name}</option>
             ))}
           </select>
@@ -196,7 +236,6 @@ export default function ToolsPage() {
           />
         </div>
 
-        {/* Edit Modal */}
         {editTool && (
           <div className="fixed inset-0 bg-black/60 z-50 overflow-y-auto">
             <div className="min-h-screen px-4 py-10 flex items-start justify-center">
@@ -232,7 +271,7 @@ export default function ToolsPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Ниво на трудност</label>
-                  <select value={editTool.difficulty || 'beginner'} onChange={e => setEditTool({...editTool, difficulty: e.target.value})} className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                  <select value={editTool.difficulty || 'beginner'} onChange={e => setEditTool({...editTool, difficulty: e.target.value as 'beginner' | 'intermediate' | 'advanced'})} className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
                     <option value="beginner">Начинаещ</option>
                     <option value="intermediate">Средно ниво</option>
                     <option value="advanced">Напреднал</option>
@@ -241,7 +280,7 @@ export default function ToolsPage() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Категории</label>
                   <div className="grid grid-cols-2 gap-2">
-                    {allCategories.map((cat: any) => (
+                    {allCategories.map(cat => (
                       <label key={cat.id} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
                         <input type="checkbox" checked={selectedCategories.includes(cat.id)} onChange={() => toggleCategory(cat.id)} className="rounded" />
                         {cat.name}
@@ -252,7 +291,7 @@ export default function ToolsPage() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Роли</label>
                   <div className="grid grid-cols-2 gap-2">
-                    {allRoles.map((r: any) => (
+                    {allRoles.map(r => (
                       <label key={r.id} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
                         <input type="checkbox" checked={selectedRoles.includes(r.id)} onChange={() => toggleRole(r.id)} className="rounded" />
                         {r.name}
@@ -269,7 +308,6 @@ export default function ToolsPage() {
           </div>
         )}
 
-        {/* Tools Grid */}
         {filteredTools.length === 0 ? (
           <div className="text-center py-20 text-gray-400">
             <div className="text-5xl mb-4">🔍</div>
@@ -277,32 +315,32 @@ export default function ToolsPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredTools.map((tool: any) => (
+            {filteredTools.map(tool => (
               <div key={tool.id} className="bg-white rounded-2xl shadow-sm border-2 border-indigo-100 hover:border-purple-300 p-6 hover:shadow-xl hover:scale-105 hover:-translate-y-1 transition-all duration-200 flex flex-col">
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-3 mb-2">
-  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-    {tool.name?.charAt(0).toUpperCase()}
-  </div>
-  <div className="flex-1">
-    <h3
-      onClick={() => router.push(`/tools/${tool.id}`)}
-      className="text-lg font-semibold text-gray-900 cursor-pointer hover:text-indigo-600 transition leading-tight"
-    >
-      {tool.name}
-    </h3>
-    {tool.difficulty && (
-      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-        tool.difficulty === 'beginner' ? 'bg-green-100 text-green-700' :
-        tool.difficulty === 'intermediate' ? 'bg-yellow-100 text-yellow-700' :
-        'bg-red-100 text-red-700'
-      }`}>
-        {tool.difficulty === 'beginner' ? '🟢 Начинаещ' :
-         tool.difficulty === 'intermediate' ? '🟡 Средно' : '🔴 Напреднал'}
-      </span>
-    )}
-  </div>
-</div>
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                      {tool.name?.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex-1">
+                      <h3
+                        onClick={() => router.push(`/tools/${tool.id}`)}
+                        className="text-lg font-semibold text-gray-900 cursor-pointer hover:text-indigo-600 transition leading-tight"
+                      >
+                        {tool.name}
+                      </h3>
+                      {tool.difficulty && (
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                          tool.difficulty === 'beginner' ? 'bg-green-100 text-green-700' :
+                          tool.difficulty === 'intermediate' ? 'bg-yellow-100 text-yellow-700' :
+                          'bg-red-100 text-red-700'
+                        }`}>
+                          {tool.difficulty === 'beginner' ? '🟢 Начинаещ' :
+                           tool.difficulty === 'intermediate' ? '🟡 Средно' : '🔴 Напреднал'}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
                 <p className="text-sm text-gray-500 mb-3 flex-1">{tool.description}</p>
                 {tool.link && (
@@ -311,14 +349,14 @@ export default function ToolsPage() {
                   </a>
                 )}
                 <div className="flex flex-wrap gap-1 mb-3">
-                  {tool.categories && tool.categories.map((c: any) => (
+                  {tool.categories && tool.categories.map(c => (
                     <span key={c.id} className="bg-indigo-50 text-indigo-600 text-xs px-2 py-1 rounded-full border border-indigo-100">
                       {c.name}
                     </span>
                   ))}
                 </div>
                 <div className="flex flex-wrap gap-1 mb-3">
-                  {tool.tags && tool.tags.map((t: any) => (
+                  {tool.tags && tool.tags.map(t => (
                     <span key={t.id} className="bg-purple-50 text-purple-600 text-xs px-2 py-1 rounded-full border border-purple-100">
                       #{t.name}
                     </span>
