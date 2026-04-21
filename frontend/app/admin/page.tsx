@@ -4,29 +4,62 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Navbar from '../components/Navbar'
 
+type User = {
+  id: number
+  name: string
+  email: string
+  role: 'owner' | 'backend' | 'frontend' | 'designer' | 'qa' | 'pm'
+}
+
+type Category = {
+  id: number
+  name: string
+}
+
+type Role = {
+  id: number
+  name: string
+}
+
+type Tool = {
+  id: number
+  name: string
+  status: 'pending' | 'approved' | 'rejected'
+  categories?: Category[]
+  roles?: Role[]
+}
+
+type Log = {
+  id: number
+  action: 'create' | 'update' | 'delete' | 'approve' | 'reject'
+  created_at: string
+  user?: { name: string }
+  data?: { name: string }
+}
+
 export default function AdminPage() {
   const router = useRouter()
-  const [user, setUser] = useState<any>(null)
-  const [tools, setTools] = useState<any[]>([])
-  const [logs, setLogs] = useState<any[]>([])
+  const [user, setUser] = useState<User | null>(null)
+  const [tools, setTools] = useState<Tool[]>([])
+  const [logs, setLogs] = useState<Log[]>([])
   const [activeTab, setActiveTab] = useState<'tools' | 'logs'>('tools')
   const [filterStatus, setFilterStatus] = useState('')
   const [filterCategory, setFilterCategory] = useState('')
   const [filterRole, setFilterRole] = useState('')
   const [toast, setToast] = useState('')
-  const [allCategories, setAllCategories] = useState<any[]>([])
-  const [allRoles, setAllRoles] = useState<any[]>([])
+  const [allCategories, setAllCategories] = useState<Category[]>([])
+  const [allRoles, setAllRoles] = useState<Role[]>([])
 
   useEffect(() => {
     const userData = localStorage.getItem('user')
     if (!userData) { router.push('/login'); return }
-    const parsed = JSON.parse(userData)
+    const parsed: User = JSON.parse(userData)
     if (parsed.role !== 'owner') { router.push('/dashboard'); return }
     setUser(parsed)
-    loadData(parsed)
+    loadData()
   }, [])
 
-  async function loadData(u: any) {
+  async function loadData() {
     const token = localStorage.getItem('token')
     const headers = { 'Authorization': `Bearer ${token}` }
 
@@ -59,7 +92,7 @@ export default function AdminPage() {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     showToast('Инструментът е одобрен!')
-    loadData(user)
+    loadData()
   }
 
   async function rejectTool(id: number) {
@@ -69,13 +102,13 @@ export default function AdminPage() {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     showToast('Инструментът е отказан!')
-    loadData(user)
+    loadData()
   }
 
-  const filteredTools = tools.filter((tool: any) => {
+  const filteredTools = tools.filter(tool => {
     const matchStatus = filterStatus === '' || tool.status === filterStatus
-    const matchCategory = filterCategory === '' || (tool.categories && tool.categories.some((c: any) => c.name === filterCategory))
-    const matchRole = filterRole === '' || (tool.roles && tool.roles.some((r: any) => r.name === filterRole))
+    const matchCategory = filterCategory === '' || (tool.categories && tool.categories.some(c => c.name === filterCategory))
+    const matchRole = filterRole === '' || (tool.roles && tool.roles.some(r => r.name === filterRole))
     return matchStatus && matchCategory && matchRole
   })
 
@@ -132,7 +165,7 @@ export default function AdminPage() {
                 className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
               >
                 <option value="">Всички категории</option>
-                {allCategories.map((c: any) => (
+                {allCategories.map(c => (
                   <option key={c.id} value={c.name}>{c.name}</option>
                 ))}
               </select>
@@ -142,7 +175,7 @@ export default function AdminPage() {
                 className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
               >
                 <option value="">Всички роли</option>
-                {allRoles.map((r: any) => (
+                {allRoles.map(r => (
                   <option key={r.id} value={r.name}>{r.name}</option>
                 ))}
               </select>
@@ -160,19 +193,19 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredTools.map((tool: any) => (
+                  {filteredTools.map(tool => (
                     <tr key={tool.id} className="border-b border-gray-100 hover:bg-gray-50">
                       <td className="px-4 py-3 font-medium text-gray-900">{tool.name}</td>
                       <td className="px-4 py-3">
                         <div className="flex flex-wrap gap-1">
-                          {tool.categories && tool.categories.map((c: any) => (
+                          {tool.categories && tool.categories.map(c => (
                             <span key={c.id} className="bg-blue-50 text-blue-600 text-xs px-2 py-0.5 rounded-full">{c.name}</span>
                           ))}
                         </div>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex flex-wrap gap-1">
-                          {tool.roles && tool.roles.map((r: any) => (
+                          {tool.roles && tool.roles.map(r => (
                             <span key={r.id} className="bg-purple-50 text-purple-600 text-xs px-2 py-0.5 rounded-full">{r.name}</span>
                           ))}
                         </div>
@@ -227,7 +260,7 @@ export default function AdminPage() {
                 </tr>
               </thead>
               <tbody>
-                {logs.map((log: any) => (
+                {logs.map(log => (
                   <tr key={log.id} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="px-4 py-3 font-medium text-gray-900">{log.user?.name}</td>
                     <td className="px-4 py-3">
