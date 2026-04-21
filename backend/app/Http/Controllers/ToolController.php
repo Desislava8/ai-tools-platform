@@ -1,4 +1,5 @@
-<?php
+index()липсват два филтъра. Ето целия поправен файл:
+php<?php
 
 namespace App\Http\Controllers;
 
@@ -10,13 +11,21 @@ use Illuminate\Support\Facades\Cache;
 
 class ToolController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $tools = Tool::with(['categories', 'roles', 'tags'])
+        $query = Tool::with(['categories', 'roles', 'tags'])
             ->withAvg('ratings', 'score')
             ->withCount('ratings')
             ->withCount('comments')
-            ->get();
+            ->where('status', 'approved');
+
+        if ($request->has('role_id') && $request->role_id) {
+            $query->whereHas('roles', function ($q) use ($request) {
+                $q->where('roles.id', $request->role_id);
+            });
+        }
+
+        $tools = $query->get();
 
         foreach ($tools as $tool) {
             $tool->ratings_avg_score = round($tool->ratings_avg_score ?? 0, 1);
