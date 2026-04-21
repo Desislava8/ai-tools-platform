@@ -1,12 +1,21 @@
-'use client'
+
+TSX'use client'
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Navbar from '../components/Navbar'
 
+type User = {
+  id: number
+  name: string
+  email: string
+  role: 'owner' | 'backend' | 'frontend' | 'designer' | 'qa' | 'pm'
+  two_factor_enabled?: boolean
+}
+
 export default function ProfilePage() {
   const router = useRouter()
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -19,7 +28,7 @@ export default function ProfilePage() {
     if (!userData) {
       router.push('/login')
     } else {
-      const parsed = JSON.parse(userData)
+      const parsed: User = JSON.parse(userData)
       setUser(parsed)
       setName(parsed.name)
       setEmail(parsed.email)
@@ -32,8 +41,8 @@ export default function ProfilePage() {
     const res = await fetch('http://localhost:8000/api/me', {
       headers: { 'Authorization': `Bearer ${token}` }
     })
-    const data = await res.json()
-    setTwoFactorEnabled(data.two_factor_enabled)
+    const data: User = await res.json()
+    setTwoFactorEnabled(data.two_factor_enabled ?? false)
   }
 
   function showToast(msg: string) {
@@ -53,7 +62,7 @@ export default function ProfilePage() {
     })
 
     if (res.ok) {
-      const updatedUser = { ...user, name, email }
+      const updatedUser: User = { ...user!, name, email }
       localStorage.setItem('user', JSON.stringify(updatedUser))
       setUser(updatedUser)
       setEditing(false)
@@ -70,7 +79,7 @@ export default function ProfilePage() {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` }
     })
-    const data = await res.json()
+    const data: { two_factor_enabled: boolean; message: string } = await res.json()
     setTwoFactorEnabled(data.two_factor_enabled)
     showToast(data.message)
   }
