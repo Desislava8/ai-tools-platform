@@ -1,8 +1,26 @@
-'use client'
+
+TSX'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Navbar from '../components/Navbar'
+
+type User = {
+  id: number
+  name: string
+  email: string
+  role: 'owner' | 'backend' | 'frontend' | 'designer' | 'qa' | 'pm'
+}
+
+type Category = {
+  id: number
+  name: string
+}
+
+type Role = {
+  id: number
+  name: string
+}
 
 export default function AddToolPage() {
   const router = useRouter()
@@ -15,14 +33,14 @@ export default function AddToolPage() {
   const [selectedCategories, setSelectedCategories] = useState<number[]>([])
   const [selectedRoles, setSelectedRoles] = useState<number[]>([])
   const [videoUrl, setVideoUrl] = useState('')
-  const [difficulty, setDifficulty] = useState('beginner')
+  const [difficulty, setDifficulty] = useState<'beginner' | 'intermediate' | 'advanced'>('beginner')
   const [tags, setTags] = useState('')
   const [screenshots, setScreenshots] = useState('')
   const [message, setMessage] = useState('')
   const [messageType, setMessageType] = useState<'success' | 'error'>('success')
-  const [categories, setCategories] = useState<any[]>([])
-  const [roles, setRoles] = useState<any[]>([])
-  const [user, setUser] = useState<any>(null)
+  const [categories, setCategories] = useState<Category[]>([])
+  const [roles, setRoles] = useState<Role[]>([])
+  const [user, setUser] = useState<User | null>(null)
 
   useEffect(() => {
     const userData = localStorage.getItem('user')
@@ -118,7 +136,7 @@ export default function AddToolPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100">
-      <Navbar user={user} />
+      <Navbar user={user!} />
 
       <div className="max-w-2xl mx-auto px-4 py-10">
         <h2 className="text-2xl font-bold text-gray-900 mb-8">➕ Добави AI инструмент</h2>
@@ -211,7 +229,7 @@ export default function AddToolPage() {
             <label className="block text-sm font-medium text-gray-700 mb-1">Ниво на трудност</label>
             <select
               value={difficulty}
-              onChange={e => setDifficulty(e.target.value)}
+              onChange={e => setDifficulty(e.target.value as 'beginner' | 'intermediate' | 'advanced')}
               className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black"
             >
               <option value="beginner">Начинаещ</option>
@@ -226,7 +244,7 @@ export default function AddToolPage() {
               {categories.length === 0 ? (
                 <p className="text-sm text-gray-400 col-span-2">Зареждане...</p>
               ) : (
-                categories.map((cat: any) => (
+                categories.map(cat => (
                   <label key={cat.id} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
                     <input
                       type="checkbox"
@@ -247,7 +265,7 @@ export default function AddToolPage() {
               {roles.length === 0 ? (
                 <p className="text-sm text-gray-400 col-span-2">Зареждане...</p>
               ) : (
-                roles.map((r: any) => (
+                roles.map(r => (
                   <label key={r.id} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
                     <input
                       type="checkbox"
