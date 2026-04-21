@@ -1,17 +1,53 @@
-'use client'
+
+TSX'use client'
 
 import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Navbar from '../../components/Navbar'
 
+type User = {
+  id: number
+  name: string
+  role: 'owner' | 'backend' | 'frontend' | 'designer' | 'qa' | 'pm'
+  email: string
+}
+
+type Category = {
+  id: number
+  name: string
+}
+
+type Tool = {
+  id: number
+  name: string
+  link?: string
+  description?: string
+  categories?: Category[]
+}
+
+type Comment = {
+  id: number
+  content: string
+  created_at: string
+  user?: {
+    id: number
+    name: string
+  }
+}
+
+type Ratings = {
+  average: number
+  count: number
+}
+
 export default function ToolDetailPage() {
   const router = useRouter()
   const params = useParams()
   const toolId = params.id
-  const [user, setUser] = useState<any>(null)
-  const [tool, setTool] = useState<any>(null)
-  const [comments, setComments] = useState<any[]>([])
-  const [ratings, setRatings] = useState<any>({ average: 0, count: 0 })
+  const [user, setUser] = useState<User | null>(null)
+  const [tool, setTool] = useState<Tool | null>(null)
+  const [comments, setComments] = useState<Comment[]>([])
+  const [ratings, setRatings] = useState<Ratings>({ average: 0, count: 0 })
   const [newComment, setNewComment] = useState('')
   const [userRating, setUserRating] = useState(0)
   const [toast, setToast] = useState('')
@@ -33,9 +69,9 @@ export default function ToolDetailPage() {
     const headers = { 'Authorization': `Bearer ${token}` }
 
     const toolRes = await fetch(`http://localhost:8000/api/tools`, { headers })
-    const tools = await toolRes.json()
-    const found = tools.find((t: any) => t.id === Number(toolId))
-    setTool(found)
+    const tools: Tool[] = await toolRes.json()
+    const found = tools.find(t => t.id === Number(toolId))
+    setTool(found || null)
 
     fetch(`http://localhost:8000/api/tools/${toolId}/comments`, { headers })
       .then(r => r.json())
@@ -105,10 +141,9 @@ export default function ToolDetailPage() {
         </div>
       )}
 
-      <Navbar user={user} />
+      <Navbar user={user!} />
 
       <div className="max-w-3xl mx-auto px-4 py-10">
-        {/* Tool Info */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">{tool.name}</h1>
           <p className="text-gray-500 mb-4">{tool.description}</p>
@@ -120,12 +155,11 @@ export default function ToolDetailPage() {
           )}
 
           <div className="flex flex-wrap gap-1 mt-4">
-            {tool.categories && tool.categories.map((c: any) => (
+            {tool.categories && tool.categories.map(c => (
               <span key={c.id} className="bg-blue-50 text-blue-600 text-xs px-2 py-1 rounded-full">{c.name}</span>
             ))}
           </div>
 
-          {/* Rating */}
           <div className="mt-6 pt-6 border-t border-gray-100">
             <h3 className="text-sm font-medium text-gray-700 mb-2">Рейтинг</h3>
             <div className="flex items-center gap-2 mb-3">
@@ -149,7 +183,6 @@ export default function ToolDetailPage() {
           </div>
         </div>
 
-        {/* Comments */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
           <h3 className="text-lg font-bold text-gray-900 mb-4">💬 Коментари ({comments.length})</h3>
 
@@ -173,7 +206,7 @@ export default function ToolDetailPage() {
             {comments.length === 0 && (
               <p className="text-gray-400 text-sm">Няма коментари все още.</p>
             )}
-            {comments.map((comment: any) => (
+            {comments.map(comment => (
               <div key={comment.id} className="border-b border-gray-100 pb-4">
                 <div className="flex justify-between items-start">
                   <div>
