@@ -1,12 +1,17 @@
 'use client'
-
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Navbar from '../components/Navbar'
 
+type User = {
+  name: string
+  role: 'owner' | 'backend' | 'frontend' | 'designer' | 'qa' | 'pm'
+  email: string
+}
+
 export default function DashboardPage() {
   const router = useRouter()
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
 
   useEffect(() => {
     const userData = localStorage.getItem('user')
@@ -26,13 +31,11 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100">
       <Navbar user={user} />
-
       <div className="max-w-6xl mx-auto px-4 py-10">
         <div className="mb-10">
           <h2 className="text-3xl font-bold text-gray-900">Добре дошъл, {user.name}! 👋</h2>
           <p className="text-gray-500 mt-1">Ти си с роля: <span className="font-semibold text-gray-700">{user.role}</span></p>
         </div>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <div
             onClick={() => router.push('/tools')}
@@ -42,7 +45,6 @@ export default function DashboardPage() {
             <h3 className="text-lg font-semibold text-gray-900">Всички инструменти</h3>
             <p className="text-sm text-gray-500 mt-1">Разгледай и управлявай AI инструментите</p>
           </div>
-
           {(user.role === 'owner' || user.role === 'backend' || user.role === 'frontend') && (
             <div
               onClick={() => router.push('/add-tool')}
@@ -53,7 +55,6 @@ export default function DashboardPage() {
               <p className="text-sm text-gray-500 mt-1">Добави нов AI инструмент към платформата</p>
             </div>
           )}
-
           <div
             onClick={() => router.push('/profile')}
             className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-md hover:border-gray-300 transition"
@@ -62,7 +63,6 @@ export default function DashboardPage() {
             <h3 className="text-lg font-semibold text-gray-900">Моят профил</h3>
             <p className="text-sm text-gray-500 mt-1">Виж и редактирай профилните си данни</p>
           </div>
-
           {user.role === 'owner' && (
             <div
               onClick={() => router.push('/admin')}
